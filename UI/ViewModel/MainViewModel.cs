@@ -426,7 +426,7 @@ namespace UI.ViewModel
                 {
                     _compile = new RelayCommand(param => compilerManager.Compile(compilerManager.GenerateAsamplRepresentation(librariesRepresentations,
                         HandlerRepresentation, renderRepresentation, sourcesRepresentation, setsRepresentation, elementsRepresentation, tuplesRepresentation, aggregateRepresentation,
-                        actionsRepresentation)));
+                        actionsRepresentation), LibraryPath, Handlerpath));
                 }
 
                 return _compile;
