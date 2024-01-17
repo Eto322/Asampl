@@ -1,0 +1,29 @@
+﻿<Window x:Class="UI.View.AddView.AddSetView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI.View.AddView"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:addViewModel="clr-namespace:UI.ViewModel.AddViewModel"
+        mc:Ignorable="d"
+        Title="AddSet" Height="170" Width="300">
+
+    <Window.DataContext>
+        <addViewModel:AddSetViewModel></addViewModel:AddSetViewModel>
+    </Window.DataContext>
+
+    <StackPanel>
+
+        <!-- Текстове поле для вводу імені -->
+        <TextBox x:Name="NameTextBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                 Margin="10" />
+
+        <!-- Випадаюче меню для вибору типу -->
+        <ComboBox x:Name="TypeComboBox" Margin="5" SelectedIndex="0" SelectedItem="{Binding SelectedType }" ItemsSource="{Binding ValidTypes}">
+        </ComboBox>
+
+        <!-- Кнопка OK -->
+        <Button Content="OK"  Margin="5" Padding="10,5" Command="{Binding OkCommand}" />
+    </StackPanel>
+</Window>

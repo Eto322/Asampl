@@ -1,0 +1,449 @@
+﻿<Window x:Class="UI.View.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:viewModel="clr-namespace:UI.ViewModel"
+        xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.WPF.DragDrop"
+        mc:Ignorable="d"
+        Title="ASAMPL IDE" Height="700" Width="1000">
+    <Window.DataContext>
+        <viewModel:MainViewModel></viewModel:MainViewModel>
+    </Window.DataContext>
+    <Window.Resources>
+        <SolidColorBrush x:Key="Brush" Color="#303030"></SolidColorBrush>
+    </Window.Resources>
+
+    <DockPanel LastChildFill="True">
+        <!-- Меню та Панель інструментів -->
+
+        <Menu DockPanel.Dock="Top" Background="#50ac54">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Command="{Binding Deserealize}" />
+                <MenuItem Header="Save" Command="{Binding Sereialize}" />
+                <MenuItem Header="Exit" />
+            </MenuItem>
+            <MenuItem Header="Code">
+                <MenuItem Header="Save" Command="{Binding SerealizeCode}" />
+                <MenuItem Header="Open" />
+            </MenuItem>
+            <MenuItem Header="Help">
+            </MenuItem>
+        </Menu>
+
+        <ToolBar DockPanel.Dock="Top" Margin="-5" Background="#3a633c">
+            <Button Content="Run" ToolTip="Run the code" Command="{Binding Compile}" />
+            <Separator />
+        </ToolBar>
+
+        <!-- Основна область роботи -->
+        <Grid DockPanel.Dock="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Таб контрол зліва -->
+            <TabControl Margin="0,1,0,0" TabStripPlacement="Left" Grid.Column="0"
+                        Style="{StaticResource MaterialDesignNavigationRailTabControl}">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CodeTags" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid DockPanel.Dock="Top" Width="399">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Меню вибору ключових блоків -->
+                        <ListView x:Name="KeyBlocksMenu"  Grid.Column="0" ItemsSource="{Binding AsamplKeyWord}"
+                                  SelectedItem="{Binding SelectedAsamplKeyWordModel}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10">
+                                        <TextBlock Text="{Binding KeyWordName}">
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <ListView x:Name="CodeBlocksList" Grid.Column="1" BorderBrush="Gray"
+                                  dd:DragDrop.IsDragSource="True" dd:DragDrop.DragHandler="{Binding }">
+                            <ListView.Resources>
+                                <CollectionViewSource x:Key="DataContainersSource" Source="{Binding DataContainers}" />
+
+                                <!-- Style for the ComboBox -->
+                                <Style x:Key="ConditionalComboBoxStyle" TargetType="ComboBox">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.SelectedAsamplKeyWordModel.KeyWordName, RelativeSource={RelativeSource AncestorType=ListView}}" Value="ACTIONS">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Resources>
+
+                            <ListView.ItemsSource>
+                                <CompositeCollection>
+                                    <!-- Static element for the "Add" option -->
+                                    <ListViewItem>
+                                        <StackPanel Orientation="Vertical">
+                                            <Button FontWeight="Bold" Width="230" Height="38" Command="{Binding AddCommand}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Add " />
+                                                    <TextBlock Text="{Binding Path=SelectedAsamplKeyWordModel.KeyWordName}" />
+                                                </StackPanel>
+                                            </Button>
+                                            <!-- ComboBox appears only for the specific keyword -->
+                                        </StackPanel>
+                                    </ListViewItem>
+                                    <!-- Data binding -->
+                                    <CollectionContainer Collection="{Binding Source={StaticResource DataContainersSource}}" />
+                                </CompositeCollection>
+                            </ListView.ItemsSource>
+                            <!-- Item template for code blocks -->
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10" Margin="5">
+                                        <TextBlock Text="{Binding DataName}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Settings" />
+                            <TextBlock  Margin="5,0,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <TabItem.Content>
+                        <StackPanel Width="929">
+                            <!-- Вибір теми -->
+                            <!--<TextBlock Text="Theme" FontWeight="Bold" Margin="0,10,0,0" />
+                            <ComboBox SelectedIndex="{Binding SelectedThemeIndex, Mode=TwoWay}">
+                                <ComboBoxItem>Dark</ComboBoxItem>
+                                <ComboBoxItem>Light</ComboBoxItem>
+                            </ComboBox>
+
+                            -->
+                            <!-- Зміна розміру шрифту -->
+                            <!--
+                            <TextBlock Text="Font Size" FontWeight="Bold" Margin="0,10,0,0" />
+                            <Slider Minimum="10" Maximum="20" Value="14" TickFrequency="1" IsSnapToTickEnabled="True" />-->
+
+                            <!-- library path -->
+                            <TextBlock Text="Library Path" FontWeight="Bold" Margin="0,10,0,0" />
+                            <TextBox Text="{Binding LibraryPath}" />
+
+                            <!-- handler path -->
+                            <TextBlock Text="Handler Path" FontWeight="Bold" Margin="0,10,0,0" />
+                            <TextBox Text="{Binding Handlerpath}" />
+
+                            <!-- Додаткові налаштування -->
+                        </StackPanel>
+                    </TabItem.Content>
+                </TabItem>
+
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Git" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <!-- Git Integration UI -->
+                    <Grid Margin="0,10,0,10" Width="927">
+                        <!-- Clone Repository Section -->
+                        <GroupBox Header="Clone Repository" Margin="5">
+                            <StackPanel>
+                                <TextBox Margin="5"
+                         Text="{Binding GitCloneUrl, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox Margin="5"
+                         Text="{Binding GitLocalPath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Content="Clone" Margin="5"
+                        Command="{Binding GitCloneCommand}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Commit Changes Section -->
+                        <GroupBox Header="Commit Changes" Margin="5">
+                            <StackPanel>
+                                <TextBox  Margin="5"
+                         Text="{Binding GitCommitMessage, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Content="Commit" Margin="5"
+                        Command="{Binding GitCommitCommand}" />
+                            </StackPanel>
+                        </GroupBox>
+                        <!-- Status and Log Section -->
+                        <GroupBox Header="Status and Logs" Margin="5">
+                            <TextBox AcceptsReturn="True" IsReadOnly="True"
+                     Text="{Binding GitLogs, UpdateSourceTrigger=PropertyChanged}" />
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+                <!--<TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="GoogleAnalytics" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    -->
+                <!-- Code Analysis UI -->
+                <!--
+                    <Grid Margin="0,10,0,10" Width="924">
+                        -->
+                <!-- Code Input Section -->
+                <!--
+                        <GroupBox Header="Input Code for Analysis" Margin="5">
+                            <TextBox AcceptsReturn="True" HorizontalScrollBarVisibility="Auto"
+                     VerticalScrollBarVisibility="Auto" Height="100"
+                     Text="{Binding CodeToAnalyze, UpdateSourceTrigger=PropertyChanged}" />
+                        </GroupBox>
+
+                        -->
+                <!-- Analysis Options Section -->
+                <!--
+                        <GroupBox Header="Analysis Options" Margin="5">
+                            <StackPanel>
+                                -->
+                <!-- Add options like checkboxes or radio buttons for analysis criteria here -->
+                <!--
+                                <CheckBox Content="Option 1" IsChecked="{Binding Option1, Mode=TwoWay}" />
+                                <CheckBox Content="Option 2" IsChecked="{Binding Option2, Mode=TwoWay}" />
+                                -->
+                <!-- Add more options as needed -->
+                <!--
+                            </StackPanel>
+                        </GroupBox>
+
+                        -->
+                <!-- Analyze Button -->
+                <!--
+                        <Button Content="Analyze Code" Margin="5"
+                Command="{Binding AnalyzeCodeCommand}" />
+
+                        -->
+                <!-- Analysis Results Section -->
+                <!--
+                        <GroupBox Header="Analysis Results" Margin="5">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{Binding AnalysisResults, UpdateSourceTrigger=PropertyChanged}" />
+                            </ScrollViewer>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>-->
+            </TabControl>
+
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Margin="5">
+
+                <!-- Основний контейнер -->
+                <StackPanel Grid.Column="1">
+
+                    <!-- PROGRAM Name -->
+                    <TextBlock Text="PROGRAM DebugForm {" FontWeight="Bold" FontSize="14" />
+
+                    <!-- LIBRARIES Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding librariesDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="LIBRARIES {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding librariesRepresentations}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteLibraryRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- HANDLERS Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding handlerDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="HANDLERS {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding HandlerRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteHandlerRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- RENDERERS Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding renderDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="RENDERERS {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding renderRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteRenderRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- SOURCES Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding sourcesDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="SOURCES {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding sourcesRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteSourcesRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- SETS Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding setsDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="SETS {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding setsRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteSetsRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- ELEMENTS Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding elementsDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="ELEMENTS {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding elementsRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteElementsRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- TUPLES Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                 dd:DragDrop.DropHandler="{Binding tupleseDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="TUPLES {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding tuplesRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteTupleseRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- AGGREGATES Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                dd:DragDrop.DropHandler="{Binding aggregateDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="AGGREGATES {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding aggregateRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                Command="{Binding DataContext.DeleteAggregateRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                    <!-- ACTIONS Section -->
+                    <ContentControl dd:DragDrop.IsDropTarget="True"
+                                     dd:DragDrop.DropHandler="{Binding actionsDropHandler}">
+                        <StackPanel>
+                            <TextBlock Text="ACTIONS {" Margin="10" FontWeight="Bold" />
+                            <ItemsControl ItemsSource="{Binding actionsRepresentation}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" Margin="5" />
+                                            <Button Content="X"
+                                                    Command="{Binding DataContext.DeleteActionRepresentationCommand, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ContentControl>
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+
+                    <TextBlock Text="}" FontWeight="Bold" FontSize="14" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Window>
